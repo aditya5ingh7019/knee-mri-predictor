@@ -90,16 +90,6 @@ docker run -p 8000:8000 knee-mri-predictor
 
 ---
 
-# Project Structure
-textknee-mri-predictor/
-├── main.py                  # FastAPI application + model
-├── best_model_2series.pt    # Trained model weights
-├── requirements.txt
-├── Dockerfile
-└── README.md
-
----
-
 # Model Details
 
 Backbone: facebook/dinov2-small
