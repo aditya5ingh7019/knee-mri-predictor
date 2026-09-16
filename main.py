@@ -5,6 +5,7 @@ from PIL import Image
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from torchvision import transforms
 from transformers import Dinov2Model
+from fastapi.responses import HTMLResponse
 
 app = FastAPI(
     title="DINOv2 Multi-Series Abnormality Predictor",
@@ -127,13 +128,123 @@ def load_slice(contents: bytes) -> torch.Tensor:
 # ------------------------------------------------------------------
 # API Endpoint
 # ------------------------------------------------------------------
-@app.get("/")
-def root():
-    return {
-        "message": "DINOv2 Knee Abnormality Predictor is running",
-        "docs": "/docs",
-        "endpoint": "POST /predict (upload series1 + series2)"
-    }
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Knee MRI Abnormality Predictor</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: 'Segoe UI', system-ui, sans-serif;
+                background: linear-gradient(135deg, #0f172a, #1e293b);
+                color: #e2e8f0;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .card {
+                background: #1e293b;
+                border: 1px solid #334155;
+                border-radius: 16px;
+                padding: 40px;
+                max-width: 680px;
+                width: 100%;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            }
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+                color: #38bdf8;
+            }
+            .subtitle {
+                color: #94a3b8;
+                margin-bottom: 30px;
+                font-size: 1.05rem;
+            }
+            .badge {
+                display: inline-block;
+                background: #0ea5e9;
+                color: white;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                margin-bottom: 20px;
+            }
+            p {
+                line-height: 1.6;
+                margin-bottom: 16px;
+                color: #cbd5e1;
+            }
+            .endpoints {
+                background: #0f172a;
+                border-radius: 10px;
+                padding: 16px 20px;
+                margin: 24px 0;
+                font-family: monospace;
+            }
+            .endpoints a {
+                color: #38bdf8;
+                text-decoration: none;
+            }
+            .endpoints a:hover { text-decoration: underline; }
+            .btn {
+                display: inline-block;
+                background: #0ea5e9;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                margin-top: 10px;
+                transition: background 0.2s;
+            }
+            .btn:hover { background: #0284c7; }
+            .footer {
+                margin-top: 30px;
+                font-size: 0.85rem;
+                color: #64748b;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="badge">Live Demo</div>
+            <h1>Knee MRI Abnormality Predictor</h1>
+            <p class="subtitle">DINOv2-based Multi-Series Model (Sagittal + Coronal)</p>
+
+            <p>
+                This API predicts the probability of 12 common knee abnormalities from MRI slices 
+                using a fine-tuned DINOv2 vision transformer with multi-series fusion.
+            </p>
+
+            <div class="endpoints">
+                <div>Interactive Docs → <a href="/docs">/docs</a></div>
+                <div>Prediction Endpoint → <a href="/docs#/default/predict_predict_post">POST /predict</a></div>
+            </div>
+
+            <p><strong>How to use:</strong></p>
+            <p>
+                1. Go to <a href="/docs" style="color:#38bdf8">/docs</a><br>
+                2. Upload one <strong>Sagittal</strong> and one <strong>Coronal</strong> MRI slice<br>
+                3. Get probabilities for ACL, Meniscus tears, OA, Effusion, etc.
+            </p>
+
+            <a href="/docs" class="btn">Try the API →</a>
+
+            <div class="footer">
+                Built with FastAPI + PyTorch + DINOv2 · Deployed on Render
+            </div>
+        </div>
+    </body>
+    </html>
+    """
 
 
 @app.post("/predict")
